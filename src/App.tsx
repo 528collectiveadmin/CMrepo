@@ -246,6 +246,18 @@ function App() {
                 Explore the music
               </a>
             </div>
+            <figure className="hero-art-frame" aria-label="Global intention artwork placeholder">
+              <img
+                alt="A diverse circle of people holding a glowing Earth together"
+                decoding="async"
+                height="960"
+                loading="eager"
+                sizes="(min-width: 900px) 480px, calc(100vw - 40px)"
+                src="/assets/hero/manifestwave-global-placeholder-960.webp"
+                srcSet="/assets/hero/manifestwave-global-placeholder-640.webp 640w, /assets/hero/manifestwave-global-placeholder-960.webp 960w"
+                width="960"
+              />
+            </figure>
           </div>
 
           <aside className="now-card" aria-labelledby="current-wave-title">
