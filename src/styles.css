@@ -482,6 +482,123 @@ strong {
   50% { box-shadow: 0 0 0 14px rgba(149, 100, 221, 0); }
 }
 
+.active-wave-ticker {
+  position: relative;
+  z-index: 1;
+  width: min(var(--content), calc(100% - (var(--gutter) * 2)));
+  margin: 34px auto 0;
+  overflow: hidden;
+  border: 1px solid rgba(123, 53, 232, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(245, 237, 255, 0.78));
+  box-shadow: 0 14px 36px rgba(62, 15, 141, 0.11);
+}
+
+.active-wave-ticker-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 14px 18px 0;
+  color: var(--muted);
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.active-wave-ticker-header strong {
+  color: var(--purple-bright);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.active-wave-marquee {
+  overflow: hidden;
+  padding: 14px 0 18px;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.active-wave-track {
+  display: flex;
+  width: max-content;
+  min-width: 200%;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 0;
+  list-style: none;
+  animation: active-wave-scroll 44s linear infinite;
+}
+
+.active-wave-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid rgba(62, 15, 141, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 16px rgba(62, 15, 141, 0.09);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateY(calc((var(--wave-index) - 5.5) * 1.7px));
+}
+
+.active-wave-flag:nth-child(12n + 1),
+.active-wave-flag:nth-child(12n + 12) {
+  transform: translateY(4px) rotate(-1deg);
+}
+
+.active-wave-flag:nth-child(12n + 2),
+.active-wave-flag:nth-child(12n + 11) {
+  transform: translateY(9px) rotate(-0.6deg);
+}
+
+.active-wave-flag:nth-child(12n + 3),
+.active-wave-flag:nth-child(12n + 10) {
+  transform: translateY(13px) rotate(-0.2deg);
+}
+
+.active-wave-flag:nth-child(12n + 4),
+.active-wave-flag:nth-child(12n + 9) {
+  transform: translateY(10px) rotate(0.2deg);
+}
+
+.active-wave-flag:nth-child(12n + 5),
+.active-wave-flag:nth-child(12n + 8) {
+  transform: translateY(3px) rotate(0.6deg);
+}
+
+.active-wave-flag:nth-child(12n + 6),
+.active-wave-flag:nth-child(12n + 7) {
+  transform: translateY(-4px) rotate(1deg);
+}
+
+.active-wave-flag img {
+  display: block;
+  width: 30px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(62, 15, 141, 0.16);
+}
+
+@keyframes active-wave-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .live-wave-panel {
   display: grid;
   gap: 14px;
@@ -1183,6 +1300,20 @@ input[type='checkbox'] {
 
   .button {
     width: 100%;
+  }
+
+  .active-wave-ticker-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-inline: 14px;
+  }
+
+  .active-wave-flag span {
+    display: none;
+  }
+
+  .active-wave-flag {
+    padding-inline: 10px;
   }
 
   .now-card,

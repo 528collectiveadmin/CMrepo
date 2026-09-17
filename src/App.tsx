@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BlogSection } from './components/BlogSection';
 import { ContactWaitlistForm } from './components/ContactWaitlistForm';
@@ -61,6 +61,39 @@ function LiveWaveCountryPanel({ countries }: { countries: ManifestWaveCountry[] 
           <LiveWaveCountryRows countries={countryPreview.hiddenCountries} />
         </details>
       ) : null}
+    </section>
+  );
+}
+
+function ActiveWaveFlagTicker({ countries, zoneLabel }: { countries: ManifestWaveCountry[]; zoneLabel: string }) {
+  if (!countries.length) {
+    return null;
+  }
+
+  const baseLoopCopies = countries.length < 8 ? 4 : 2;
+  const baseLoop = Array.from({ length: baseLoopCopies }, () => countries).flat();
+  const tickerCountries = [...baseLoop, ...baseLoop];
+
+  return (
+    <section className="active-wave-ticker" aria-label={`Scrolling flags for ${zoneLabel}`}>
+      <div className="active-wave-ticker-header">
+        <span>Current wave crossing {zoneLabel}</span>
+        <strong>{countries.length} flags in motion</strong>
+      </div>
+      <div className="active-wave-marquee" aria-hidden="true">
+        <ul className="active-wave-track">
+          {tickerCountries.map((country, index) => (
+            <li
+              className="active-wave-flag"
+              key={`${country.id}-${index}`}
+              style={{ '--wave-index': index % 12 } as CSSProperties}
+            >
+              <img src={country.flagPath} alt="" />
+              <span>{country.name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
@@ -273,6 +306,7 @@ function App() {
             <LiveWaveCountryPanel countries={activeCountries} />
           </aside>
         </div>
+        <ActiveWaveFlagTicker countries={activeCountries} zoneLabel={activeZone.label} />
       </section>
 
       <section className="section intro" id="manifestwave">
