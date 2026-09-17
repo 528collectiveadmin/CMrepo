@@ -263,6 +263,8 @@ function App() {
           </div>
         </nav>
 
+        <ActiveWaveFlagTicker countries={activeCountries} zoneLabel={activeZone.label} />
+
         <div className="hero-grid" id="top">
           <div className="hero-copy">
             <p className="eyebrow">ManifestWave 528</p>
@@ -306,7 +308,6 @@ function App() {
             <LiveWaveCountryPanel countries={activeCountries} />
           </aside>
         </div>
-        <ActiveWaveFlagTicker countries={activeCountries} zoneLabel={activeZone.label} />
       </section>
 
       <section className="section intro" id="manifestwave">
