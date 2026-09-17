@@ -1306,7 +1306,7 @@ input[type='checkbox'] {
     grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.82fr);
     gap: 58px;
     padding-top: 84px;
-    align-items: center;
+    align-items: start;
   }
 
   .hero-copy {
@@ -1324,6 +1324,10 @@ input[type='checkbox'] {
 
   .hero-art-frame {
     margin-inline: 0;
+  }
+
+  .now-card {
+    margin-top: -28px;
   }
 
   .split {
