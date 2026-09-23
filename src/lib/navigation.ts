@@ -6,6 +6,7 @@ export type NavigationItem = {
 export const navigationItems: NavigationItem[] = [
   { label: 'ManifestWave', href: '#manifestwave' },
   { label: 'Music', href: '#music' },
+  { label: 'Community', href: '#community' },
   { label: 'Sign in', href: '#member-auth' },
   { label: 'Blog', href: '#blog' },
   { label: 'About', href: '#about' },

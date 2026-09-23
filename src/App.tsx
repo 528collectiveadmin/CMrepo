@@ -4,6 +4,7 @@ import { BlogSection } from './components/BlogSection';
 import { ContactWaitlistForm } from './components/ContactWaitlistForm';
 import { MemberAuthPanel } from './components/MemberAuthPanel';
 import { WatchVideoBar } from './components/WatchVideoBar';
+import { communityBoardPrompts } from './lib/communityBoard';
 import {
   getCurrentManifestWaveSlot,
   getCountriesInFivePmWave,
@@ -391,6 +392,36 @@ function App() {
           <strong>Members sign in / new members sign up</strong>
           <p>Members sign in. New members start here.</p>
           <MemberAuthPanel />
+        </div>
+      </section>
+
+      <section className="section community-section" id="community" aria-labelledby="community-title">
+        <div className="community-header">
+          <p className="eyebrow">Community message board</p>
+          <h2 id="community-title">A place for ideas, questions, and shared 5:28 experiences.</h2>
+          <p>
+            The original site promised a member message board. This launch board restores that path now,
+            while the full sign-in posting system is prepared behind the scenes.
+          </p>
+        </div>
+        <div className="community-board-grid" aria-label="Community message board topics">
+          {communityBoardPrompts.map((prompt) => (
+            <article key={prompt.title}>
+              <h3>{prompt.title}</h3>
+              <p>{prompt.description}</p>
+            </article>
+          ))}
+        </div>
+        <div className="community-note panel">
+          <strong>Want to start the conversation?</strong>
+          <p>
+            Use the contact form for now to send a topic, question, volunteer note, or story from your
+            local wave. Member posting will connect here once the Supabase-backed board is enabled.
+          </p>
+          <div className="community-actions">
+            <a className="button primary" href="#contact">Send a message</a>
+            <a className="button secondary" href="#member-auth">Sign in / join</a>
+          </div>
         </div>
       </section>
 

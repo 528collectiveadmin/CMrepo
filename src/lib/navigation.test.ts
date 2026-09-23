@@ -13,4 +13,11 @@ describe('site navigation', () => {
   it('does not use the long member signup label that crowds the sticky nav', () => {
     expect(navigationItems.map((item) => item.label)).not.toContain('Members sign in / new members sign up');
   });
+
+  it('includes the community message board anchor from the original site flow', () => {
+    expect(navigationItems).toContainEqual({
+      label: 'Community',
+      href: '#community',
+    });
+  });
 });
