@@ -124,6 +124,12 @@ export function ProtectedMemberDashboard({ session, onSignOut }: ProtectedMember
       <p className="dashboard-note">
         {getProtectionNote(session)}
       </p>
+
+      <div className="dashboard-footer-actions" aria-label="Member dashboard actions">
+        <button className="button secondary" onClick={onSignOut} type="button">
+          {memberDashboardCopy.signOutButton}
+        </button>
+      </div>
     </section>
   );
 }

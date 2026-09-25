@@ -1256,6 +1256,14 @@ input[type='checkbox'] {
   margin-top: 10px;
 }
 
+.dashboard-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
 .admin-recent-events {
   font-family: var(--ui);
   font-size: 0.82rem;
