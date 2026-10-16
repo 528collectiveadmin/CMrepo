@@ -1,108 +1,98 @@
 # Collective Manifestation
 
-Local workspace for rebuilding `collectivemanifestation.org`.
+Source for [collectivemanifestation.org](https://collectivemanifestation.org): the home of Collective Manifestation and the ManifestWave, a daily 5:28 PM intention practice that travels around the world one time zone at a time.
 
-## Source context
+## How it's hosted
 
-- Project brief: `docs/cmprompt-source.md`
-- Source asset inventory: `docs/source-assets-inventory.md`
-- Time-zone image outsourcing prompts: `docs/timezone-image-prompts.md`
-- Informational time-zone card prompts: `docs/timezone-informational-card-prompts.md`
-- Hosting/Supabase architecture: `docs/hosting-and-supabase-architecture.md`
-- Bootstrap plan: `.hermes/plans/2026-08-15_145044-collective-manifestation-bootstrap.md`
-- Original note location: `C:\Users\Rick\.hermes\CollectiveManifestation\cmprompt.md`
-- GitHub repository: `https://github.com/528manifestation/collective-manifestation`
+| Piece | Where |
+| --- | --- |
+| Code | GitHub — `528collectiveadmin/CMrepo` (`main` is production) |
+| Hosting | Netlify — project `lovely-torte-14f684`, deploys automatically on every push to `main` |
+| Database, auth | Supabase — project `collective-manifestation` (`wmbjrfmmcgidllmnjnar`, us-east-1) |
+| Domain | `collectivemanifestation.org` → Netlify |
 
-## Current status
+There's no custom server. The site is a static single-page app that talks to Supabase directly from the browser, with row-level security on every table.
 
-WORKING/IDLE: project workspace created; source resources inventoried; GitHub remote configured and initial docs pushed; hosting direction selected as Vercel + Supabase; ManifestWave spreadsheet/card draft pipeline generated; Vite + React + TypeScript + Supabase client skeleton built locally; full cleaned ManifestWave JSON data and music preview assets are wired locally; first Vercel deployment is live as a private review link; Vercel Git is connected to the correct GitHub repo; no custom DNS changes made.
+## Stack
 
-## Architecture direction
+- Vite + React 19 + TypeScript
+- `@supabase/supabase-js` for data and member sign-in
+- Vitest for tests
 
-- Host/deploy on **Vercel**.
-- Use **Supabase** for database/backend needs.
-- Rick has a paid/premium Supabase plan, so Supabase is acceptable for the production path.
-- Replit is historical only and should not be used for the rebuild.
-- Default app recommendation: Vite + React + TypeScript with Supabase client integration.
-
-## Vercel deployment
-
-The first Vercel deployment is live at:
-
-- `https://collective-manifestation.vercel.app/`
-- Project: `rckbender-4266s-projects/collective-manifestation`
-- Project ID: `prj_pcq2jH0QZ6UvbKGDmtpMkaaBQLkj`
-
-Important: the first Vercel deployment was automatically assigned as production by Vercel. No Squarespace/custom DNS records were changed. The initial CLI deploy could not connect the GitHub repository automatically because the Vercel account reported missing admin/write access to `528manifestation/collective-manifestation`; Rick later connected the Vercel project to `528manifestation/collective-manifestation` in Vercel Project Settings → Git.
-
-Current launch stance: keep the Vercel URL live only as a private technical review link. Do not promote it, announce it, connect DNS, or treat it as a public launch. Password protection was attempted but blocked by Vercel because Advanced Deployment Protection is not enabled on the team.
-
-## Source resources
-
-Rick confirmed all current resources should remain in the original source folder and be copied/moved into this project only as needed:
-
-- `C:\Users\Rick\.hermes\CollectiveManifestation`
-
-Verified current resources include music MP3s, old-site HTML/CSS reference files, flag SVGs, country map-outline JPGs, and old site/logo imagery.
-
-## ManifestWave card pipeline
-
-Generated planning/build artifacts:
-
-- Spreadsheet workbook: `docs/manifestwave-timezone-chart.xlsx`
-- Clean card lists: `docs/manifestwave-timezone-card-lists.md`
-- Asset manifest: `docs/manifestwave-asset-manifest.csv`
-- Card prompt pack: `docs/timezone-card-prompts/`
-- Draft card PNGs: `public/assets/manifestwave/timezone-cards/`
-- Copied flag assets: `public/assets/manifestwave/flags/`
-- Copied map-outline assets: `public/assets/manifestwave/maps/`
-- Regeneration scripts: `scripts/generate_manifestwave_timezone_chart.py`, `scripts/prepare_manifestwave_cards.py`
-
-Draft card QA status: flags are complete, but some map outlines are missing and some copied map outlines contain embedded text/labels that must be cleaned before final production use. Original source assets remain untouched.
-
-## App skeleton
-
-The local web app skeleton uses Vite + React + TypeScript with a Supabase browser client placeholder.
-
-Key files:
-
-- `package.json` — app scripts and dependencies
-- `src/App.tsx` — one-page site skeleton
-- `src/lib/manifestwave.ts` — ManifestWave helper/data layer for the first UI pass
-- `src/data/manifestwave-zones.json` — full cleaned 24-zone country/region dataset generated from the spreadsheet
-- `src/data/songs.json` — local music track metadata
-- `src/lib/music.ts` — music data helper layer
-- `src/lib/supabase.ts` — Supabase client initialization from Vite environment variables
-- `supabase/migrations/0001_initial_schema.sql` — draft schema for songs, contact, waitlist, zones, and countries
-- `.env.example` — expected Supabase env var names without secrets
-
-Current commands:
+## Running it locally
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in the two values below
+npm run dev                  # http://127.0.0.1:5173
 npm test
 npm run build
-npm run dev -- --port 5173
 ```
 
-The current UI pass wires in the 24 generated card PNGs, the full cleaned ManifestWave JSON dataset, and 9 local MP3 preview tracks. The production data model should later be replaced with Supabase-backed `manifestwave_zones`, `manifestwave_countries`, and `songs` records.
+### Environment variables
 
-## High-level scope
+Set these in `.env.local` for local work, and in **Netlify → Project configuration → Environment variables** for the live site:
 
-- Public landing page for Collective Manifestation / ManifestWave.
-- Welcome video placeholder.
-- Live time-zone wave tracker for the 5:28 call.
-- Informational time-zone cards showing each zone's countries/regions with country/region names and flags.
-- Setting-of-Intentions video placeholder.
-- Original music library with lyrics/artwork/downloads.
-- Community, blog/about/FAQ, contact, and donation/support sections.
-- Supabase-backed music metadata, contact messages, and optional member/waitlist records.
-- Member profile settings editor for display name, timezone, and country.
-- Blog section with local launch posts and a drafted Supabase `blog_posts` schema for future publishing.
+| Name | Value |
+| --- | --- |
+| `VITE_SUPABASE_URL` | `https://wmbjrfmmcgidllmnjnar.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | The project's publishable (anon) key from Supabase → Project Settings → API |
 
-## Guardrails
+The anon key is safe to ship to browsers; row-level security is what protects the data. Never put the `service_role` key in this repo or in Netlify.
 
-- GitHub remote is linked locally; do not commit or push until Rick explicitly approves.
-- Do not change Squarespace DNS without Rick's explicit approval.
-- Do not make further production deploys without Rick's explicit approval.
-- Do not post/publish promotional content without Rick's explicit approval.
-- Prefer a simple Vercel + Supabase architecture; do not add a custom server unless a real need appears.
+If the variables are missing, the site still loads using the local fallback content (songs, blog posts), but sign-in, the contact form and wave check-ins won't work.
+
+## What's on the site
+
+- **Hero + live wave** — shows which time zone is in its 5 PM hour right now and a scrolling ticker of its flags.
+- **ManifestWave** — 24 time-zone cards. Countries are assigned to a slot from their real IANA time zone, so daylight-saving shifts are handled automatically (`src/lib/manifestwave.ts`, data in `src/data/manifestwave-zones.json`).
+- **Intention practice** — the five-minute 5:28 practice.
+- **Music library** — songs from the `songs` table, with local MP3s and artwork in `public/assets`.
+- **Members** — sign up / sign in with Supabase Auth, profile settings (display name, time zone, country), and wave check-ins.
+- **Admin dashboard** — signed-in admins can edit songs, blog posts and site text.
+- **Community, blog, about, contact, support** sections.
+- **Contact form** — saves to `contact_messages`; people who opt in are added to `waitlist_members`.
+
+## Database
+
+Tables (all in `public`, all with RLS on): `songs`, `blog_posts`, `site_content`, `profiles`, `wave_participation_events`, `contact_messages`, `waitlist_members`, `manifestwave_zones`, `manifestwave_countries`.
+
+- A new auth user automatically gets a `profiles` row (trigger `create_profile_after_auth_user_insert`).
+- Admin rights come from `profiles.role = 'admin'`, checked by `private.current_user_is_admin()`. To make someone an admin, set their `role` to `admin` in the Supabase table editor.
+- `manifestwave_zones` / `manifestwave_countries` are currently unused. They describe a fixed country→slot model that doesn't handle daylight saving; the app uses the JSON dataset instead.
+- Contact messages and the update list are read in the Supabase dashboard (Table editor → `contact_messages` / `waitlist_members`).
+
+### Migrations
+
+SQL changes live in `supabase/migrations/` and every one of them has been applied to the live project. Supabase's migration history matches this folder.
+
+To change the schema, add a new file named `YYYYMMDDHHMMSS_description.sql` (UTC timestamp), apply it to the project (Supabase SQL editor, CLI, or an AI assistant with the Supabase connector), and commit the file. Don't edit migrations that have already been applied.
+
+## Project layout
+
+```text
+src/
+  App.tsx              page layout and sections
+  components/          admin dashboard, member panels, forms, blog
+  lib/                 data + logic (one module per feature, each with tests)
+  data/                time-zone dataset, local song metadata
+public/assets/         music, artwork, flags, maps, time-zone cards
+supabase/migrations/   database schema history
+scripts/               Python scripts that regenerate the time-zone dataset/cards
+docs/                  original brief, asset inventory, time-zone spreadsheets
+```
+
+`docs/` and `.hermes/` are planning notes from the original build and describe an earlier Vercel-based plan; this README is the current source of truth.
+
+## Known gaps / next up
+
+- Supabase Auth: turn on leaked-password protection (Authentication → Attack Protection / Password settings).
+- Contact form has no spam protection beyond validation; add a honeypot or captcha if spam shows up.
+- No email notification for new contact messages yet; they're only visible in Supabase.
+- Some time-zone card map outlines still need cleanup (see `docs/manifestwave-card-build-report.md`).
+- Main JS bundle is ~530 KB; code-splitting the admin dashboard would trim it.
+
+## Ground rules
+
+- `main` deploys straight to the live site, so run `npm test && npm run build` before pushing.
+- Don't change DNS without the site owner's say-so.

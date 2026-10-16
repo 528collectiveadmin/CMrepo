@@ -6,8 +6,10 @@ import {
   ContactWaitlistForm as ContactWaitlistFormState,
   createContactWaitlistPayload,
   initialContactWaitlistForm,
+  submitContactWaitlist,
   validateContactWaitlistForm,
 } from '../lib/contactForm';
+import { supabase } from '../lib/supabase';
 
 type InterestOption = {
   value: Exclude<ContactInterest, ''>;
@@ -25,6 +27,7 @@ export function ContactWaitlistForm() {
   const [form, setForm] = useState<ContactWaitlistFormState>(initialContactWaitlistForm);
   const [errors, setErrors] = useState<ContactWaitlistErrors>({});
   const [statusMessage, setStatusMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   function updateField<Field extends keyof ContactWaitlistFormState>(
     field: Field,
@@ -35,8 +38,12 @@ export function ContactWaitlistForm() {
     setStatusMessage('');
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isSending) {
+      return;
+    }
 
     const validation = validateContactWaitlistForm(form);
     setErrors(validation.errors);
@@ -46,9 +53,24 @@ export function ContactWaitlistForm() {
       return;
     }
 
-    const payload = createContactWaitlistPayload(form);
-    console.info('Local-only contact/waitlist preview payload:', payload);
-    setStatusMessage('Message sent.');
+    setIsSending(true);
+    setStatusMessage('Sending…');
+
+    const result = await submitContactWaitlist(supabase, createContactWaitlistPayload(form));
+
+    setIsSending(false);
+
+    if (!result.ok) {
+      setStatusMessage(result.error);
+      return;
+    }
+
+    setForm(initialContactWaitlistForm);
+    setStatusMessage(
+      result.joinedUpdateList
+        ? 'Thank you — your message was sent and you’re on the update list.'
+        : 'Thank you — your message was sent.',
+    );
   }
 
   return (
@@ -130,10 +152,10 @@ export function ContactWaitlistForm() {
       </div>
 
       <div className="form-actions">
-        <button className="button primary" type="submit">
-          Send message
+        <button className="button primary" disabled={isSending} type="submit">
+          {isSending ? 'Sending…' : 'Send message'}
         </button>
-        <p>{statusMessage || 'Questions and offers to help are welcome.'}</p>
+        <p aria-live="polite">{statusMessage || 'Questions and offers to help are welcome.'}</p>
       </div>
     </form>
   );

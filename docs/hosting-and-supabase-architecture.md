@@ -1,3 +1,5 @@
+> **Historical planning note (Aug 2026).** The site now runs on Netlify + Supabase from `528collectiveadmin/CMrepo`, and the schema is live. See the README for the current setup.
+
 # Hosting and Supabase Architecture
 
 ## Decision
