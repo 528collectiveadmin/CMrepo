@@ -8,7 +8,7 @@ Source for [collectivemanifestation.org](https://collectivemanifestation.org): t
 | --- | --- |
 | Code | GitHub — `528collectiveadmin/CMrepo` (`main` is production) |
 | Hosting | Netlify — project `lovely-torte-14f684`, deploys automatically on every push to `main` |
-| Database, auth | Supabase — project `collective-manifestation` (`wmbjrfmmcgidllmnjnar`, us-east-1) |
+| Database, auth | Supabase — project `collective-manifestation` (`wmbjrfmmcgidllmnjnar`, us-east-1), **Free** plan; see `docs/supabase-pro-upgrade-checklist.md` |
 | Domain | `collectivemanifestation.org` → Netlify |
 
 There's no custom server. The site is a static single-page app that talks to Supabase directly from the browser, with row-level security on every table.
@@ -86,7 +86,7 @@ docs/                  original brief, asset inventory, time-zone spreadsheets
 
 ## Known gaps / next up
 
-- Supabase Auth: turn on leaked-password protection (Authentication → Attack Protection / Password settings).
+- Supabase is on the Free plan: no automatic daily backups, and leaked-password protection isn't available. Steps for after upgrading are in `docs/supabase-pro-upgrade-checklist.md`.
 - Contact form has no spam protection beyond validation; add a honeypot or captcha if spam shows up.
 - No email notification for new contact messages yet; they're only visible in Supabase.
 - Some time-zone card map outlines still need cleanup (see `docs/manifestwave-card-build-report.md`).
