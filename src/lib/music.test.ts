@@ -42,7 +42,7 @@ describe('music data', () => {
       'The Awakening',
       'Flow',
       'Global Song',
-      'Unity',
+      'Unity Calling',
       'Wave',
       'The Unity',
       'The Rising Tide',
@@ -114,7 +114,7 @@ describe('music data', () => {
     }
 
     expect([...bodies.keys()]).toEqual(
-      expect.arrayContaining(['Vivid Rise', 'The Awakening', 'Flow', 'The Unity', 'Vibe']),
+      expect.arrayContaining(['Vivid Rise', 'The Awakening', 'Flow', 'Unity Calling', 'The Unity', 'Vibe']),
     );
     expect(extractLyricsForTrack(masterLyrics, 8, 'The Unity')).toContain('5:28, we congregate, vibrations elevatin');
     expect(extractLyricsForTrack(masterLyrics, 2, 'Vivid Rise')).toContain("We need love, we need love, we need love instead");
