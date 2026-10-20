@@ -52,10 +52,23 @@ export function getTotalMusicSizeBytes(songList: Song[] = songs): number {
   return songList.reduce((total, song) => total + song.sizeBytes, 0);
 }
 
+function normalizeTitle(title: string): string {
+  return title.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Finds a song's lyrics in the master lyrics file. Sections start with a
+ * "N. Title" line. The title is matched first, so renumbering tracks in the
+ * admin dashboard can't show one song's lyrics under another; the number is
+ * only a fallback.
+ */
 export function extractLyricsForTrack(masterLyrics: string, trackNumber: number, displayTitle: string): string {
   const sectionPattern = /^\s*(\d+)\.\s+(.+?)\s*$/gm;
   const sections = [...masterLyrics.matchAll(sectionPattern)];
-  const sectionIndex = sections.findIndex((section) => Number(section[1]) === trackNumber);
+  const wantedTitle = normalizeTitle(displayTitle);
+  const titleIndex = sections.findIndex((section) => normalizeTitle(section[2]) === wantedTitle);
+  const sectionIndex =
+    titleIndex !== -1 ? titleIndex : sections.findIndex((section) => Number(section[1]) === trackNumber);
 
   if (sectionIndex === -1) {
     return `${displayTitle}\n\nLyrics are not available yet.`;

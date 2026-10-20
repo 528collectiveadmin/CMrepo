@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import masterLyricsFile from '../../public/assets/music/Lyrics.txt?raw';
+
 import {
   extractLyricsForTrack,
   fetchPublishedSongs,
@@ -80,6 +82,42 @@ describe('music data', () => {
     const masterLyrics = `Intro line\n\n1. Collective Manifestation (theme song)\n[Verse]\nTheme words\n\n2. Vivid Rise\n[Verse]\nRise words\n`;
 
     expect(extractLyricsForTrack(masterLyrics, 2, 'Vivid Rise')).toBe('Vivid Rise\n\n[Verse]\nRise words');
+  });
+
+  it('prefers a title match over the track number', () => {
+    const masterLyrics = `2. Vibe\nVibe words\n\n3. Vivid Rise\nRise words\n`;
+
+    expect(extractLyricsForTrack(masterLyrics, 2, 'Vivid Rise')).toBe('Vivid Rise\n\nRise words');
+  });
+
+  it('does not confuse "Unity" with "The Unity"', () => {
+    const masterLyrics = `8. The Unity\nThe Unity words\n`;
+
+    expect(extractLyricsForTrack(masterLyrics, 6, 'Unity')).toBe('Unity\n\nLyrics are not available yet.');
+  });
+
+  it('gives every published song its own lyrics from public/assets/music/Lyrics.txt', () => {
+    const masterLyrics = masterLyricsFile;
+    const bodies = new Map<string, string>();
+
+    for (const song of songs) {
+      const lyrics = extractLyricsForTrack(masterLyrics, song.trackNumber, song.title);
+      const body = lyrics.slice(song.title.length).trim();
+
+      if (body === 'Lyrics are not available yet.') {
+        continue;
+      }
+
+      const owner = [...bodies.entries()].find(([, existing]) => existing === body)?.[0];
+      expect(owner, `${song.title} shows the same lyrics as ${owner}`).toBeUndefined();
+      bodies.set(song.title, body);
+    }
+
+    expect([...bodies.keys()]).toEqual(
+      expect.arrayContaining(['Vivid Rise', 'The Awakening', 'Flow', 'The Unity', 'Vibe']),
+    );
+    expect(extractLyricsForTrack(masterLyrics, 8, 'The Unity')).toContain('5:28, we congregate, vibrations elevatin');
+    expect(extractLyricsForTrack(masterLyrics, 2, 'Vivid Rise')).toContain("We need love, we need love, we need love instead");
   });
 
   it('keeps the theme song first even when Supabase order is wrong', () => {
