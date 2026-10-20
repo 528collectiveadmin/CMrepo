@@ -204,7 +204,7 @@ function App() {
 
   return (
     <main>
-      <section className="hero">
+      <header className="site-header">
         <nav className="nav" aria-label="Primary navigation">
           <a className="brand" href="#top" aria-label="Collective Manifestation home">
             <picture className="brand-mark">
@@ -263,7 +263,9 @@ function App() {
             ) : null}
           </div>
         </nav>
+      </header>
 
+      <section className="hero">
         <ActiveWaveFlagTicker countries={activeCountries} zoneLabel={activeZone.label} />
 
         <div className="hero-grid" id="top">
@@ -282,19 +284,20 @@ function App() {
                 Explore the music
               </a>
             </div>
-            <figure className="hero-art-frame" aria-label="Global intention artwork placeholder">
-              <img
-                alt="A diverse circle of people holding a glowing Earth together"
-                decoding="async"
-                height="960"
-                loading="eager"
-                sizes="(min-width: 900px) 480px, calc(100vw - 40px)"
-                src="/assets/hero/manifestwave-global-placeholder-960.webp"
-                srcSet="/assets/hero/manifestwave-global-placeholder-640.webp 640w, /assets/hero/manifestwave-global-placeholder-960.webp 960w"
-                width="960"
-              />
-            </figure>
           </div>
+
+          <figure className="hero-art-frame" aria-label="Global intention artwork placeholder">
+            <img
+              alt="A diverse circle of people holding a glowing Earth together"
+              decoding="async"
+              height="960"
+              loading="eager"
+              sizes="(min-width: 900px) 600px, calc(100vw - 40px)"
+              src="/assets/hero/manifestwave-global-placeholder-960.webp"
+              srcSet="/assets/hero/manifestwave-global-placeholder-640.webp 640w, /assets/hero/manifestwave-global-placeholder-960.webp 960w"
+              width="960"
+            />
+          </figure>
 
           <aside className="now-card" aria-labelledby="current-wave-title">
             <p className="eyebrow">Current 5 PM wave zone</p>
@@ -336,7 +339,7 @@ function App() {
         <WatchVideoBar />
       </section>
 
-      <section className="section split" id="music">
+      <section className="section split music-section" id="music">
         <div>
           <p className="eyebrow">Original music</p>
           <h2>Original music library</h2>
@@ -362,11 +365,11 @@ function App() {
               </article>
             ))}
           </div>
-          <div className="lyrics-sidebar" aria-live="polite">
-            <span>Lyrics</span>
-            <h3>{selectedSong?.title || 'Select a song'}</h3>
-            <pre>{selectedLyrics}</pre>
-          </div>
+        </div>
+        <div className="lyrics-sidebar" aria-live="polite">
+          <span>Lyrics</span>
+          <h3>{selectedSong?.title || 'Select a song'}</h3>
+          <pre>{selectedLyrics}</pre>
         </div>
       </section>
 

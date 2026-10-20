@@ -199,6 +199,12 @@ strong {
 
 /* ---- navigation ---------------------------------------------- */
 
+.site-header {
+  position: relative;
+  z-index: 30;
+  background: #fff;
+}
+
 .hero {
   position: relative;
   overflow: clip;
@@ -231,8 +237,8 @@ strong {
   min-height: 72px;
   padding: 0;
   border-bottom: 1px solid rgba(62, 15, 141, 0.09);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+  /* No backdrop-filter here: it would trap the full-screen phone menu inside the bar. */
+  background: #fff;
 }
 
 .brand {
@@ -386,8 +392,9 @@ strong {
 
 .hero-art-frame {
   position: relative;
+  width: 100%;
   max-width: 520px;
-  margin: 32px auto 0;
+  margin: 0 auto;
   overflow: hidden;
   aspect-ratio: 4 / 3;
   border: 1px solid rgba(123, 53, 232, 0.2);
@@ -925,7 +932,7 @@ details li small {
 }
 
 .lyrics-sidebar {
-  margin-top: 22px;
+  min-width: 0;
   padding: 22px;
   border: 1px solid rgba(62, 15, 141, 0.1);
   border-radius: var(--radius-lg);
@@ -1566,6 +1573,175 @@ input[type='checkbox'] {
   .blog-grid,
   .support-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---- desktop layout ------------------------------------------- */
+/* The phone layout above is untouched; these rules use the extra width. */
+
+@media (min-width: 900px) {
+  html {
+    scroll-padding-top: 104px;
+  }
+
+  /* Menu bar: larger and pinned to the top while scrolling. */
+  .site-header {
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid rgba(62, 15, 141, 0.1);
+    background: #fff;
+    box-shadow: 0 6px 24px rgba(62, 15, 141, 0.06);
+  }
+
+  .site-header .nav {
+    min-height: 92px;
+    gap: 20px;
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .brand {
+    gap: 14px;
+    font-size: 1.6rem;
+  }
+
+  .brand-mark,
+  .brand img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .nav-links {
+    gap: clamp(16px, 2vw, 30px);
+    font-size: 1rem;
+  }
+
+  .nav-links a {
+    padding: 10px 0;
+  }
+
+  .nav-account-link {
+    padding: 11px 22px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+  }
+
+  .nav-links a.nav-account-link {
+    padding: 11px 22px;
+  }
+
+  /* Hero: headline beside the artwork, live wave panel full width underneath. */
+  .hero-grid {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-areas:
+      'copy art'
+      'card card';
+    gap: 44px 56px;
+    align-items: center;
+    padding-top: 48px;
+  }
+
+  .hero-copy {
+    grid-area: copy;
+  }
+
+  .hero-art-frame {
+    grid-area: art;
+    max-width: none;
+  }
+
+  .now-card {
+    grid-area: card;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+    column-gap: 48px;
+    align-content: start;
+    margin-top: 0;
+    padding: 34px 36px;
+  }
+
+  .now-card > :not(.live-wave-panel) {
+    grid-column: 1;
+  }
+
+  .now-card > .live-wave-panel {
+    grid-column: 2;
+    grid-row: 1 / span 6;
+    align-self: start;
+    margin-top: 0;
+    padding-top: 0;
+    padding-left: 48px;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  /* Music: songs on the left, lyrics on the right and kept in view. */
+  .music-section {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .music-section .lyrics-sidebar {
+    position: sticky;
+    top: 120px;
+    margin-top: 0;
+  }
+
+  .music-section .lyrics-sidebar pre {
+    max-height: calc(100vh - 300px);
+    min-height: 240px;
+  }
+}
+
+/* Small laptops / tablets held sideways: same layout, slightly smaller menu. */
+@media (min-width: 900px) and (max-width: 1279px) {
+  .site-header .nav {
+    min-height: 82px;
+    gap: 16px;
+  }
+
+  .brand {
+    gap: 10px;
+    font-size: 1.18rem;
+    line-height: 1.12;
+  }
+
+  .brand span {
+    max-width: 9.5em;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .brand span::after {
+    content: none;
+  }
+
+  .brand-mark,
+  .brand img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .nav-links {
+    gap: clamp(12px, 1.4vw, 20px);
+    font-size: 0.92rem;
+  }
+
+  .nav-account-link,
+  .nav-links a.nav-account-link {
+    padding: 9px 16px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --content: 1200px;
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --content: 1280px;
   }
 }
 
