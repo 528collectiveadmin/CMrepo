@@ -158,7 +158,6 @@ function AdminBlogPanel() {
   const [rows, setRows] = useState<AdminBlogRow[]>([]);
   const [editingId, setEditingId] = useState<string | undefined>();
   const [title, setTitle] = useState('');
-  const [summary, setSummary] = useState('');
   const [body, setBody] = useState('');
   const [status, setStatus] = useState('Loading your posts…');
   const [isSaving, setIsSaving] = useState(false);
@@ -188,7 +187,6 @@ function AdminBlogPanel() {
   function startNewPost() {
     setEditingId(undefined);
     setTitle('');
-    setSummary('');
     setBody('');
     setStatus('');
   }
@@ -196,7 +194,6 @@ function AdminBlogPanel() {
   function startEditing(row: AdminBlogRow) {
     setEditingId(row.id);
     setTitle(row.title);
-    setSummary(row.excerpt || '');
     setBody(row.body || '');
     setStatus(`Editing “${row.title}”.`);
     document.getElementById('admin-blog-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -211,7 +208,7 @@ function AdminBlogPanel() {
     setStatus('Saving…');
     const result = await saveBlogPost(
       supabase as unknown as AdminBlogClientLike | null,
-      { id: editingId, title, summary, body },
+      { id: editingId, title, summary: '', body },
       action,
       rows,
     );
@@ -273,13 +270,6 @@ function AdminBlogPanel() {
             placeholder="Write or paste your post here. Each new line starts a new paragraph."
             rows={14}
           />
-        </label>
-        <label>
-          <span>Short summary (optional)</span>
-          <textarea value={summary} onChange={(event) => setSummary(event.target.value)} rows={3} />
-          <small className="field-hint">
-            Shown on the blog before someone clicks “Read more”. Leave it blank to use the first sentence or two.
-          </small>
         </label>
         <div className="form-actions">
           <button className="button primary" disabled={isSaving} type="submit">
