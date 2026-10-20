@@ -86,8 +86,15 @@ export function MemberAuthPanel() {
     }
 
     if (isSupabaseConfigured) {
-      const result = await signUpMemberWithSupabase(supabase, signupForm);
-      if (result.ok) {
+      const result = await signUpMemberWithSupabase(supabase, signupForm, `${window.location.origin}/`);
+      if (result.ok && result.needsEmailConfirmation) {
+        setSignupForm(initialSignupForm);
+        setLoginForm((current) => ({ ...current, email: result.email }));
+        setMode('login');
+        setStatusMessage(
+          `Almost there! We sent a confirmation link to ${result.email}. Click it to finish setting up your account. If you don't see it, check your spam folder.`,
+        );
+      } else if (result.ok) {
         setMemberSession(result.session);
         setStatusMessage('Account created and member dashboard opened.');
       } else {

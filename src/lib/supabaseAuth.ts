@@ -27,8 +27,11 @@ type SupabaseAuthClientLike = {
     signUp(payload: {
       email: string;
       password: string;
-      options: { data: { username: string; country: string } };
-    }): PromiseLike<{ data: { user: SupabaseUserLike | null }; error: SupabaseError | null }>;
+      options: { data: { username: string; country: string }; emailRedirectTo?: string };
+    }): PromiseLike<{
+      data: { user: SupabaseUserLike | null; session?: SupabaseSessionLike | null };
+      error: SupabaseError | null;
+    }>;
     signInWithPassword(payload: {
       email: string;
       password: string;
@@ -119,10 +122,17 @@ function mapUserToMemberSession(user: SupabaseUserLike): SupabaseMemberSession {
   };
 }
 
+export type SignupOutcome =
+  /** Signed in straight away (email confirmation is turned off in Supabase). */
+  | { session: SupabaseMemberSession; needsEmailConfirmation: false; email: string }
+  /** Account created, but the member must click the link in their email before they can sign in. */
+  | { session: null; needsEmailConfirmation: true; email: string };
+
 export async function signUpMemberWithSupabase(
   client: SupabaseAuthClientLike | null,
   form: SignupForm,
-): Promise<SupabaseAuthResult<{ session: SupabaseMemberSession }>> {
+  emailRedirectTo?: string,
+): Promise<SupabaseAuthResult<SignupOutcome>> {
   if (!client) {
     return notConfiguredResult;
   }
@@ -138,7 +148,7 @@ export async function signUpMemberWithSupabase(
   const signup = await client.auth.signUp({
     email,
     password: form.password,
-    options: { data: { username, country } },
+    options: { data: { username, country }, ...(emailRedirectTo ? { emailRedirectTo } : {}) },
   });
 
   if (signup.error) {
@@ -149,9 +159,15 @@ export async function signUpMemberWithSupabase(
     return { ok: false, error: 'Signup did not return a Supabase user.' };
   }
 
+  if (!signup.data.session) {
+    return { ok: true, session: null, needsEmailConfirmation: true, email };
+  }
+
   return {
     ok: true,
-    session: mapUserToMemberSession({ ...signup.data.user, email, user_metadata: { username, country } }),
+    needsEmailConfirmation: false,
+    email,
+    session: mapUserToMemberSession({ ...signup.data.session.user, email, user_metadata: { username, country } }),
   };
 }
 

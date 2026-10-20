@@ -20,6 +20,7 @@ type FakeSession = {
 
 function createFakeClient(options: {
   signUpUser?: FakeUser | null;
+  signUpSession?: FakeSession | null;
   signInSession?: FakeSession | null;
   currentSession?: FakeSession | null;
   signUpError?: string;
@@ -41,7 +42,10 @@ function createFakeClient(options: {
       signUp: async (payload: unknown) => {
         calls.signUp.push(payload);
         return {
-          data: { user: options.signUpUser ?? { id: 'user-123', email: 'member@example.com' } },
+          data: {
+            user: options.signUpUser ?? { id: 'user-123', email: 'member@example.com' },
+            session: options.signUpSession ?? null,
+          },
           error: options.signUpError ? { message: options.signUpError } : null,
         };
       },
@@ -115,7 +119,9 @@ describe('Supabase member auth service', () => {
   });
 
   it('signs up with Supabase Auth and leaves profile creation to the database trigger', async () => {
-    const { client, calls } = createFakeClient();
+    const { client, calls } = createFakeClient({
+      signUpSession: { user: { id: 'user-123', email: 'member@example.com' } },
+    });
 
     const result = await signUpMemberWithSupabase(client, {
       username: ' Manifest_Member ',
@@ -127,6 +133,7 @@ describe('Supabase member auth service', () => {
 
     expect(result).toMatchObject({
       ok: true,
+      needsEmailConfirmation: false,
       session: {
         id: 'user-123',
         username: 'manifest_member',
@@ -142,6 +149,45 @@ describe('Supabase member auth service', () => {
       options: { data: { username: 'manifest_member', country: 'United States' } },
     });
     expect(calls.profileInsert).toHaveLength(0);
+  });
+
+  it('does not treat an unconfirmed signup as signed in', async () => {
+    const { client } = createFakeClient({ signUpSession: null });
+
+    const result = await signUpMemberWithSupabase(client, {
+      username: 'manifest_member',
+      email: 'Member@Example.com',
+      country: 'United States',
+      password: 'ManifestWave528',
+      confirmPassword: 'ManifestWave528',
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      session: null,
+      needsEmailConfirmation: true,
+      email: 'member@example.com',
+    });
+  });
+
+  it('sends the confirmation link back to the live site', async () => {
+    const { client, calls } = createFakeClient();
+
+    await signUpMemberWithSupabase(
+      client,
+      {
+        username: 'manifest_member',
+        email: 'member@example.com',
+        country: 'United States',
+        password: 'ManifestWave528',
+        confirmPassword: 'ManifestWave528',
+      },
+      'https://collectivemanifestation.org/',
+    );
+
+    expect(calls.signUp[0]).toMatchObject({
+      options: { emailRedirectTo: 'https://collectivemanifestation.org/' },
+    });
   });
 
   it('logs in with Supabase Auth and maps the returned session to a member session', async () => {
