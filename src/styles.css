@@ -1171,13 +1171,45 @@ input[type='checkbox'] {
   text-transform: uppercase;
 }
 
-.blog-card a {
+.blog-card a,
+.blog-read-toggle {
   display: inline-flex;
   margin-top: 10px;
   color: var(--purple-bright);
   font-family: var(--ui);
   font-size: 0.9rem;
   font-weight: 800;
+}
+
+.blog-read-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.blog-read-toggle:hover,
+.blog-read-toggle:focus-visible {
+  text-decoration: underline;
+}
+
+/* An opened post spans the full row so it reads like an article. */
+.blog-card.is-open {
+  grid-column: 1 / -1;
+}
+
+.blog-body {
+  max-width: var(--measure);
+}
+
+.blog-body p {
+  margin: 0 0 0.9em;
+  white-space: pre-wrap;
+}
+
+.blog-empty {
+  margin-top: 24px;
+  color: var(--muted);
 }
 
 /* ---- support -------------------------------------------------- */
@@ -1244,9 +1276,52 @@ input[type='checkbox'] {
   list-style: none;
 }
 
-.admin-row-list li {
+.admin-row-list li,
+.admin-row-list article {
   padding: 14px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.admin-row-list strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.98rem;
+}
+
+.admin-row-list strong + span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-family: var(--ui);
+  font-size: 0.8rem;
+}
+
+.admin-list-heading {
+  margin: 28px 0 4px;
+}
+
+.admin-blog-body {
+  min-height: 280px;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.admin-save-status {
+  margin: 0;
+  color: var(--deep-purple);
+  font-family: var(--ui);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.admin-save-status:empty {
+  display: none;
 }
 
 .admin-row-actions {

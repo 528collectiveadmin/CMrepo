@@ -7,6 +7,7 @@ import {
   blogPosts,
   fetchPublishedBlogPosts,
   getPublishedBlogPosts,
+  splitIntoParagraphs,
 } from '../lib/blog';
 
 const fallbackPosts = getPublishedBlogPosts(blogPosts);
@@ -26,6 +27,7 @@ function formatPostDate(date: string | null): string {
 
 export function BlogSection() {
   const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,22 +69,48 @@ export function BlogSection() {
         </div>
       </div>
 
-      <div className="blog-grid" aria-label="Published blog posts">
-        {posts.map((post) => (
-          <article className="blog-card" key={post.id}>
-            <div>
-              <span>{formatPostDate(post.publishedAt)}</span>
-              <span aria-hidden="true"> · </span>
-              <span>{post.readTimeMinutes} min read</span>
-            </div>
-            <h3>{post.title}</h3>
-            <p>{post.excerpt}</p>
-            <a href={`#blog-${post.slug}`} aria-label={`Read ${post.title}`}>
-              Read note
-            </a>
-          </article>
-        ))}
-      </div>
+      {posts.length ? (
+        <div className="blog-grid" aria-label="Published blog posts">
+          {posts.map((post) => {
+            const isOpen = openPostId === post.id;
+
+            return (
+              <article className={`blog-card${isOpen ? ' is-open' : ''}`} id={`blog-${post.slug}`} key={post.id}>
+                <div>
+                  <span>{formatPostDate(post.publishedAt)}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{post.readTimeMinutes} min read</span>
+                </div>
+                <h3>{post.title}</h3>
+                {isOpen ? (
+                  <div className="blog-body">
+                    {splitIntoParagraphs(post.body).map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                ) : (
+                  <p>{post.excerpt}</p>
+                )}
+                <button
+                  aria-expanded={isOpen}
+                  className="blog-read-toggle"
+                  type="button"
+                  onClick={() => {
+                    setOpenPostId(isOpen ? null : post.id);
+                    if (isOpen) {
+                      document.getElementById(`blog-${post.slug}`)?.scrollIntoView({ block: 'nearest' });
+                    }
+                  }}
+                >
+                  {isOpen ? 'Show less' : 'Read more'}
+                </button>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="blog-empty">The first notes are on their way. Check back soon.</p>
+      )}
     </section>
   );
 }

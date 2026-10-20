@@ -1,4 +1,4 @@
-import { BlogPostRow, BlogPostStatus } from './blog';
+import { BlogPostRow } from './blog';
 
 export type AdminSongRow = {
   id: string;
@@ -24,17 +24,6 @@ export type AdminSongForm = {
   description: string;
   isPublished: boolean;
   isThemeSong: boolean;
-};
-
-export type AdminBlogPostForm = {
-  id?: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  body: string;
-  status: BlogPostStatus;
-  publishedAt: string;
-  heroImagePath: string;
 };
 
 export type AdminSiteContentRow = {
@@ -183,33 +172,6 @@ export async function listAdminBlogPosts(
   }
 
   return { ok: true, rows: result.data as never };
-}
-
-export async function saveAdminBlogPost(
-  client: AdminContentClientLike | null,
-  form: AdminBlogPostForm,
-): Promise<AdminRowResult<BlogPostRow & { hero_image_path?: string | null }>> {
-  if (!client) {
-    return missingClientRow();
-  }
-
-  const payload = {
-    ...(form.id ? { id: form.id } : {}),
-    slug: form.slug.trim(),
-    title: form.title.trim(),
-    excerpt: form.excerpt.trim(),
-    body: form.body.trim(),
-    status: form.status,
-    published_at: form.status === 'published' ? form.publishedAt.trim() || new Date().toISOString() : null,
-    hero_image_path: form.heroImagePath.trim() || null,
-  };
-
-  const result = await client.from('blog_posts').upsert(payload, { onConflict: 'slug' }).select(blogColumns).single();
-  if (result.error || !result.data) {
-    return { ok: false, error: getErrorMessage(result.error, 'Could not save blog post.') };
-  }
-
-  return { ok: true, row: result.data as BlogPostRow & { hero_image_path?: string | null } };
 }
 
 export async function deleteAdminBlogPost(

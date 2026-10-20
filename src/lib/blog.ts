@@ -140,3 +140,12 @@ export const blogPosts: BlogPost[] = draftPosts.map((post) => ({
   ...post,
   readTimeMinutes: calculateReadTimeMinutes(post.body),
 }));
+
+/** Each line of the post becomes its own paragraph; blank lines are ignored. */
+export function splitIntoParagraphs(body: string): string[] {
+  return body
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+}

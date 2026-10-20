@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  AdminBlogPostForm,
   AdminSiteContentForm,
   AdminSongForm,
   deleteAdminBlogPost,
@@ -10,7 +9,6 @@ import {
   listAdminBlogPosts,
   listAdminSiteContent,
   listAdminSongs,
-  saveAdminBlogPost,
   saveAdminSiteContent,
   saveAdminSong,
 } from './adminContent';
@@ -88,34 +86,6 @@ describe('admin content helpers', () => {
         description: 'Short description',
         is_published: true,
         is_theme_song: false,
-      },
-    });
-  });
-
-  it('saves blog posts with draft/published status fields', async () => {
-    const form: AdminBlogPostForm = {
-      slug: 'launch-note',
-      title: 'Launch Note',
-      excerpt: 'A short launch note.',
-      body: 'Full body text',
-      status: 'published',
-      publishedAt: '2026-08-18T12:00:00.000Z',
-      heroImagePath: '',
-    };
-    const { client, calls } = createAdminContentClient();
-
-    await expect(saveAdminBlogPost(client, form)).resolves.toMatchObject({ ok: true });
-    expect(calls[0]).toMatchObject({
-      table: 'blog_posts',
-      options: { onConflict: 'slug' },
-      payload: {
-        slug: 'launch-note',
-        title: 'Launch Note',
-        excerpt: 'A short launch note.',
-        body: 'Full body text',
-        status: 'published',
-        published_at: '2026-08-18T12:00:00.000Z',
-        hero_image_path: null,
       },
     });
   });

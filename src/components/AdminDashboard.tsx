@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
-  AdminBlogPostForm,
   AdminContentClientLike,
   AdminSiteContentForm,
   AdminSiteContentRow,
@@ -14,11 +13,11 @@ import {
   listAdminBlogPosts,
   listAdminSiteContent,
   listAdminSongs,
-  saveAdminBlogPost,
   saveAdminSiteContent,
   saveAdminSong,
 } from '../lib/adminContent';
-import { BlogPostRow, BlogPostStatus } from '../lib/blog';
+import { AdminBlogClientLike, AdminBlogRow, BlogSaveAction, saveBlogPost } from '../lib/adminBlog';
+import { BlogPostStatus } from '../lib/blog';
 import {
   WaveParticipationClientLike,
   WaveParticipationStats,
@@ -30,18 +29,6 @@ type AdminDashboardProps = {
 };
 
 type AdminTab = 'blog' | 'songs' | 'text' | 'wave';
-
-type AdminBlogRow = BlogPostRow & { hero_image_path?: string | null };
-
-const initialBlogForm: AdminBlogPostForm = {
-  slug: '',
-  title: '',
-  excerpt: '',
-  body: '',
-  status: 'draft',
-  publishedAt: '',
-  heroImagePath: '',
-};
 
 const initialSongForm: AdminSongForm = {
   slug: '',
@@ -77,19 +64,6 @@ function formatStatusLabel(status: BlogPostStatus | boolean): string {
   }
 
   return status;
-}
-
-function blogRowToForm(row: AdminBlogRow): AdminBlogPostForm {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    excerpt: row.excerpt,
-    body: row.body,
-    status: row.status,
-    publishedAt: row.published_at || '',
-    heroImagePath: row.hero_image_path || '',
-  };
 }
 
 function songRowToForm(row: AdminSongRow): AdminSongForm {
@@ -160,21 +134,48 @@ export function AdminDashboard({ username }: AdminDashboardProps) {
   );
 }
 
+function formatBlogDate(iso: string | null): string {
+  if (!iso) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso));
+}
+
+function describeBlogRow(row: AdminBlogRow): string {
+  if (row.status === 'published') {
+    return `Published ${formatBlogDate(row.published_at)} · visible on the site`;
+  }
+
+  if (row.status === 'archived') {
+    return 'Archived · not visible on the site';
+  }
+
+  return 'Draft · only admins can see it';
+}
+
 function AdminBlogPanel() {
   const [rows, setRows] = useState<AdminBlogRow[]>([]);
-  const [form, setForm] = useState<AdminBlogPostForm>(initialBlogForm);
-  const [status, setStatus] = useState('Loading blog posts…');
+  const [editingId, setEditingId] = useState<string | undefined>();
+  const [title, setTitle] = useState('');
+  const [summary, setSummary] = useState('');
+  const [body, setBody] = useState('');
+  const [status, setStatus] = useState('Loading your posts…');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const editingRow = rows.find((row) => row.id === editingId);
+  const isLive = editingRow?.status === 'published';
 
   async function loadRows() {
     if (!isSupabaseConfigured) {
-      setStatus('Supabase is not configured, so admin blog editing is disabled.');
+      setStatus('The site isn’t connected to the database, so posts can’t be edited right now.');
       return;
     }
 
     const result = await listAdminBlogPosts(getAdminClient());
     if (result.ok) {
       setRows(result.rows as AdminBlogRow[]);
-      setStatus(result.rows.length ? 'Blog posts loaded.' : 'No blog posts yet.');
+      setStatus('');
     } else {
       setStatus(result.error);
     }
@@ -184,31 +185,63 @@ function AdminBlogPanel() {
     void loadRows();
   }, []);
 
-  function updateField<Field extends keyof AdminBlogPostForm>(field: Field, value: AdminBlogPostForm[Field]) {
-    setForm((current) => ({ ...current, [field]: value }));
+  function startNewPost() {
+    setEditingId(undefined);
+    setTitle('');
+    setSummary('');
+    setBody('');
     setStatus('');
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const result = await saveAdminBlogPost(getAdminClient(), form);
-    if (result.ok) {
-      setForm(initialBlogForm);
-      setStatus('Blog post saved.');
-      await loadRows();
-    } else {
-      setStatus(result.error);
+  function startEditing(row: AdminBlogRow) {
+    setEditingId(row.id);
+    setTitle(row.title);
+    setSummary(row.excerpt || '');
+    setBody(row.body || '');
+    setStatus(`Editing “${row.title}”.`);
+    document.getElementById('admin-blog-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function save(action: BlogSaveAction) {
+    if (isSaving) {
+      return;
     }
+
+    setIsSaving(true);
+    setStatus('Saving…');
+    const result = await saveBlogPost(
+      supabase as unknown as AdminBlogClientLike | null,
+      { id: editingId, title, summary, body },
+      action,
+      rows,
+    );
+    setIsSaving(false);
+
+    if (!result.ok) {
+      setStatus(result.error);
+      return;
+    }
+
+    startNewPost();
+    setStatus(
+      action === 'publish'
+        ? `Published! “${result.row.title}” is now in the Blog section of the site.`
+        : `Saved “${result.row.title}” as a draft. It won’t appear on the site until you publish it.`,
+    );
+    await loadRows();
   }
 
   async function handleDelete(row: AdminBlogRow) {
-    if (!window.confirm(`Delete blog post "${row.title}"? This removes the database row, not source files.`)) {
+    if (!window.confirm(`Delete “${row.title}”? This can’t be undone.`)) {
       return;
     }
 
     const result = await deleteAdminBlogPost(getAdminClient(), row.id);
     if (result.ok) {
-      setStatus('Blog post deleted.');
+      if (row.id === editingId) {
+        startNewPost();
+      }
+      setStatus(`Deleted “${row.title}”.`);
       await loadRows();
     } else {
       setStatus(result.error);
@@ -217,62 +250,66 @@ function AdminBlogPanel() {
 
   return (
     <div className="admin-panel">
-      <form className="admin-form" onSubmit={handleSubmit} noValidate>
-        <h5>{form.id ? 'Edit blog post' : 'Add blog post'}</h5>
-        <div className="form-grid">
-          <label>
-            <span>Slug</span>
-            <input value={form.slug} onChange={(event) => updateField('slug', event.target.value)} placeholder="my-post-slug" />
-          </label>
-          <label>
-            <span>Status</span>
-            <select value={form.status} onChange={(event) => updateField('status', event.target.value as BlogPostStatus)}>
-              <option value="draft">draft</option>
-              <option value="published">published</option>
-              <option value="archived">archived</option>
-            </select>
-          </label>
-        </div>
+      <form
+        className="admin-form"
+        id="admin-blog-editor"
+        noValidate
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          void save('publish');
+        }}
+      >
+        <h5>{editingRow ? 'Edit post' : 'Write a new post'}</h5>
         <label>
           <span>Title</span>
-          <input value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Post title" />
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Give your post a title" />
         </label>
         <label>
-          <span>Excerpt</span>
-          <textarea value={form.excerpt} onChange={(event) => updateField('excerpt', event.target.value)} rows={3} />
+          <span>Post</span>
+          <textarea
+            className="admin-blog-body"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder="Write or paste your post here. Each new line starts a new paragraph."
+            rows={14}
+          />
         </label>
         <label>
-          <span>Body</span>
-          <textarea value={form.body} onChange={(event) => updateField('body', event.target.value)} rows={7} />
+          <span>Short summary (optional)</span>
+          <textarea value={summary} onChange={(event) => setSummary(event.target.value)} rows={3} />
+          <small className="field-hint">
+            Shown on the blog before someone clicks “Read more”. Leave it blank to use the first sentence or two.
+          </small>
         </label>
-        <div className="form-grid">
-          <label>
-            <span>Published at</span>
-            <input
-              value={form.publishedAt}
-              onChange={(event) => updateField('publishedAt', event.target.value)}
-              placeholder="2026-08-18T12:00:00.000Z"
-            />
-          </label>
-          <label>
-            <span>Hero image path</span>
-            <input value={form.heroImagePath} onChange={(event) => updateField('heroImagePath', event.target.value)} />
-          </label>
+        <div className="form-actions">
+          <button className="button primary" disabled={isSaving} type="submit">
+            {isLive ? 'Update post' : 'Publish'}
+          </button>
+          <button className="button secondary" disabled={isSaving} type="button" onClick={() => void save('draft')}>
+            {isLive ? 'Unpublish (move to drafts)' : 'Save as draft'}
+          </button>
+          {editingRow ? (
+            <button className="button secondary" disabled={isSaving} type="button" onClick={startNewPost}>
+              Cancel
+            </button>
+          ) : null}
         </div>
-        <button className="button primary" type="submit">Save blog post</button>
+        <p className="admin-save-status" aria-live="polite">
+          {status}
+        </p>
       </form>
 
+      <h5 className="admin-list-heading">Your posts</h5>
       <AdminRowsList
-        emptyLabel="No blog posts loaded."
+        emptyLabel="No posts yet. Write your first one above."
         rows={rows.map((row) => ({
           id: row.id,
           title: row.title,
-          meta: `${row.slug} · ${formatStatusLabel(row.status)}`,
-          onEdit: () => setForm(blogRowToForm(row)),
+          meta: describeBlogRow(row),
+          onEdit: () => startEditing(row),
           onDelete: () => void handleDelete(row),
         }))}
       />
-      <p className="auth-status">{status}</p>
     </div>
   );
 }

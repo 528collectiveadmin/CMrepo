@@ -7,6 +7,7 @@ import {
   fetchPublishedBlogPosts,
   getPublishedBlogPosts,
   mapBlogPostRow,
+  splitIntoParagraphs,
 } from './blog';
 
 const posts: BlogPost[] = [
@@ -161,5 +162,15 @@ describe('blog helpers', () => {
         { slug: 'why-the-wave-moves' },
       ],
     });
+  });
+});
+
+describe('splitIntoParagraphs', () => {
+  it('turns each line into a paragraph and skips blank lines', () => {
+    expect(splitIntoParagraphs('Welcome home.\nSecond line.\r\n\n\n•\tA bullet\n  ')).toEqual([
+      'Welcome home.',
+      'Second line.',
+      '•\tA bullet',
+    ]);
   });
 });
