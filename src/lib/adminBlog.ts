@@ -29,6 +29,16 @@ export type BlogSaveResult = { ok: true; row: AdminBlogRow } | { ok: false; erro
 export const adminBlogColumns = 'id, slug, title, excerpt, body, status, published_at, hero_image_path';
 
 const SUMMARY_LENGTH = 220;
+// These match the database's rules for blog_posts (see supabase/migrations/0003_create_blog_posts.sql).
+export const TITLE_MIN_LENGTH = 3;
+export const TITLE_MAX_LENGTH = 140;
+const SUMMARY_MIN_LENGTH = 10;
+const FALLBACK_SUMMARY = 'A new note from Collective Manifestation.';
+
+/** Titles are a single line; pasted line breaks become spaces. */
+export function cleanTitle(title: string): string {
+  return title.replace(/\s+/g, ' ').trim();
+}
 
 /** "The Shift Begins Here!" -> "the-shift-begins-here" */
 export function slugifyTitle(title: string): string {
@@ -63,6 +73,10 @@ export function makeUniqueSlug(base: string, takenSlugs: Iterable<string>): stri
 /** The first sentence or two of the post, for the blog card. */
 export function makeSummaryFromBody(body: string): string {
   const text = body.replace(/\s+/g, ' ').trim();
+  if (text.length < SUMMARY_MIN_LENGTH) {
+    return FALLBACK_SUMMARY;
+  }
+
   if (text.length <= SUMMARY_LENGTH) {
     return text;
   }
@@ -77,8 +91,17 @@ export function makeSummaryFromBody(body: string): string {
 }
 
 export function validateBlogEditorInput(input: BlogEditorInput): string | null {
-  if (!input.title.trim()) {
+  const title = cleanTitle(input.title);
+  if (!title) {
     return 'Please give the post a title.';
+  }
+
+  if (title.length < TITLE_MIN_LENGTH) {
+    return `The title needs at least ${TITLE_MIN_LENGTH} characters.`;
+  }
+
+  if (title.length > TITLE_MAX_LENGTH) {
+    return `The title is ${title.length} characters; the limit is ${TITLE_MAX_LENGTH}. Please shorten it and put the rest at the start of the post.`;
   }
 
   if (!input.body.trim()) {
@@ -96,9 +119,11 @@ export function buildBlogPostRow(
   now: Date = new Date(),
 ): Record<string, unknown> {
   const body = input.body.replace(/\r\n/g, '\n').trim();
+  const summary = input.summary.replace(/\s+/g, ' ').trim();
   const row: Record<string, unknown> = {
-    title: input.title.trim(),
-    excerpt: input.summary.trim() || makeSummaryFromBody(body),
+    title: cleanTitle(input.title),
+    excerpt:
+      summary.length >= SUMMARY_MIN_LENGTH && summary.length <= 280 ? summary : makeSummaryFromBody(body),
     body,
   };
 

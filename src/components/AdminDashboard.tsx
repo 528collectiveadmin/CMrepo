@@ -16,7 +16,14 @@ import {
   saveAdminSiteContent,
   saveAdminSong,
 } from '../lib/adminContent';
-import { AdminBlogClientLike, AdminBlogRow, BlogSaveAction, saveBlogPost } from '../lib/adminBlog';
+import {
+  AdminBlogClientLike,
+  AdminBlogRow,
+  BlogSaveAction,
+  TITLE_MAX_LENGTH,
+  cleanTitle,
+  saveBlogPost,
+} from '../lib/adminBlog';
 import { BlogPostStatus } from '../lib/blog';
 import {
   WaveParticipationClientLike,
@@ -163,6 +170,7 @@ function AdminBlogPanel() {
   const [isSaving, setIsSaving] = useState(false);
 
   const editingRow = rows.find((row) => row.id === editingId);
+  const titleLength = cleanTitle(title).length;
   const isLive = editingRow?.status === 'published';
 
   async function loadRows() {
@@ -260,6 +268,10 @@ function AdminBlogPanel() {
         <label>
           <span>Title</span>
           <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Give your post a title" />
+          <small className={titleLength > TITLE_MAX_LENGTH ? 'field-hint field-hint-error' : 'field-hint'}>
+            {titleLength} / {TITLE_MAX_LENGTH} characters
+            {titleLength > TITLE_MAX_LENGTH ? ' (too long; please shorten it)' : ''}
+          </small>
         </label>
         <label>
           <span>Post</span>
