@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
+  BLOG_POSTS_CHANGED_EVENT,
   BlogClientLike,
   BlogPost,
   blogPosts,
@@ -38,25 +39,29 @@ export function BlogSection() {
       };
     }
 
-    fetchPublishedBlogPosts(supabase as unknown as BlogClientLike)
-      .then((result) => {
-        if (!isMounted) {
-          return;
-        }
+    function loadPosts() {
+      fetchPublishedBlogPosts(supabase as unknown as BlogClientLike)
+        .then((result) => {
+          if (isMounted) {
+            setPosts(result.posts);
+          }
+        })
+        .catch((error: unknown) => {
+          if (!isMounted) {
+            return;
+          }
 
-        setPosts(result.posts);
-      })
-      .catch((error: unknown) => {
-        if (!isMounted) {
-          return;
-        }
+          console.info(error instanceof Error ? error.message : 'Could not load remote blog posts.');
+          setPosts(fallbackPosts);
+        });
+    }
 
-        console.info(error instanceof Error ? error.message : 'Could not load remote blog posts.');
-        setPosts(fallbackPosts);
-      });
+    loadPosts();
+    window.addEventListener(BLOG_POSTS_CHANGED_EVENT, loadPosts);
 
     return () => {
       isMounted = false;
+      window.removeEventListener(BLOG_POSTS_CHANGED_EVENT, loadPosts);
     };
   }, []);
 

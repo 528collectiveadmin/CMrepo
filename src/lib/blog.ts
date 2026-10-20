@@ -149,3 +149,12 @@ export function splitIntoParagraphs(body: string): string[] {
     .map((line) => line.trim())
     .filter(Boolean);
 }
+
+/** Fired by the admin editor after a post is published, updated or deleted, so the public blog refreshes. */
+export const BLOG_POSTS_CHANGED_EVENT = 'cm:blog-posts-changed';
+
+export function announceBlogPostsChanged(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(BLOG_POSTS_CHANGED_EVENT));
+  }
+}

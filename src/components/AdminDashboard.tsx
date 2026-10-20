@@ -24,7 +24,7 @@ import {
   cleanTitle,
   saveBlogPost,
 } from '../lib/adminBlog';
-import { BlogPostStatus } from '../lib/blog';
+import { BlogPostStatus, announceBlogPostsChanged } from '../lib/blog';
 import {
   WaveParticipationClientLike,
   WaveParticipationStats,
@@ -228,9 +228,10 @@ function AdminBlogPanel() {
     }
 
     startNewPost();
+    announceBlogPostsChanged();
     setStatus(
       action === 'publish'
-        ? `Published! “${result.row.title}” is now in the Blog section of the site.`
+        ? `Published! “${result.row.title}” is now in the Blog section of the site (scroll down to Blog to see it).`
         : `Saved “${result.row.title}” as a draft. It won’t appear on the site until you publish it.`,
     );
     await loadRows();
@@ -246,6 +247,7 @@ function AdminBlogPanel() {
       if (row.id === editingId) {
         startNewPost();
       }
+      announceBlogPostsChanged();
       setStatus(`Deleted “${row.title}”.`);
       await loadRows();
     } else {
