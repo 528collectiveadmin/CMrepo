@@ -455,7 +455,7 @@ function App() {
           </div>
         </div>
         <div className="panel" id="contact">
-          <strong>Contact / waitlist</strong>
+          <strong className="contact-title">Contact</strong>
           <p>Questions, ideas, or an offer to help — this reaches us.</p>
           <ContactWaitlistForm />
         </div>
